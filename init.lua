@@ -22,12 +22,16 @@ require('packer').startup(function()
   use 'tpope/vim-commentary' -- "gc" to comment visual regions/lines
   -- UI to select things (files, grep results, open buffers...)
   use { 'nvim-telescope/telescope.nvim', requires = { 'nvim-lua/plenary.nvim' } }
+  use 'gruvbox-community/gruvbox'
   use 'joshdick/onedark.vim' -- Theme inspired by Atom
   use 'itchyny/lightline.vim' -- Fancier statusline
+  use 'mhinz/vim-startify'
+  use 'RRethy/vim-illuminate'
   -- Add git related info in the signs columns and popups
   use { 'lewis6991/gitsigns.nvim', requires = { 'nvim-lua/plenary.nvim' } }
   -- Highlight, edit, and navigate code using a fast incremental parsing library
   use 'nvim-treesitter/nvim-treesitter'
+  use 'p00f/nvim-ts-rainbow'
   -- Additional textobjects for treesitter
   use 'nvim-treesitter/nvim-treesitter-textobjects'
   use 'neovim/nvim-lspconfig' -- Collection of configurations for built-in LSP client
@@ -36,6 +40,11 @@ require('packer').startup(function()
   use 'hrsh7th/cmp-buffer'
   use 'saadparwaiz1/cmp_luasnip'
   use 'L3MON4D3/LuaSnip' -- Snippets plugin
+ -- Other
+  use 'rhysd/vim-clang-format' 
+  use 'folke/which-key.nvim'
+  use 'skywind3000/asyncrun.vim'
+  use 'windwp/nvim-autopairs'
 end)
 
 vim.o.expandtab = true
@@ -75,11 +84,11 @@ vim.wo.signcolumn = 'yes'
 --Set colorscheme (order is important here)
 vim.o.termguicolors = true
 vim.g.onedark_terminal_italics = 2
-vim.cmd [[colorscheme onedark]]
+vim.cmd [[colorscheme gruvbox]]
 
 --Set statusbar
 vim.g.lightline = {
-  colorscheme = 'onedark',
+  colorscheme = 'gruvbox',
   active = { left = { { 'mode', 'paste' }, { 'gitbranch', 'readonly', 'absolutepath', 'modified' } } },
   component_function = { gitbranch = 'fugitive#head' },
 }
@@ -114,6 +123,7 @@ vim.g.indent_blankline_buftype_exclude = { 'terminal', 'nofile' }
 vim.g.indent_blankline_char_highlight = 'LineNr'
 vim.g.indent_blankline_show_trailing_blankline_indent = false
 
+require('nvim-autopairs').setup{}
 -- Gitsigns
 require('gitsigns').setup {
   signs = {
@@ -150,55 +160,12 @@ vim.api.nvim_set_keymap('n', '<leader>?', [[<cmd>lua require('telescope.builtin'
 
 -- Treesitter configuration
 -- Parsers must be installed manually via :TSInstall
-require('nvim-treesitter.configs').setup {
-  highlight = {
-    enable = true, -- false will disable the whole extension
-  },
-  incremental_selection = {
-    enable = true,
-    keymaps = {
-      init_selection = 'gnn',
-      node_incremental = 'grn',
-      scope_incremental = 'grc',
-      node_decremental = 'grm',
-    },
-  },
-  indent = {
-    enable = true,
-  },
-  textobjects = {
-    select = {
-      enable = true,
-      lookahead = true, -- Automatically jump forward to textobj, similar to targets.vim
-      keymaps = {
-        -- You can use the capture groups defined in textobjects.scm
-        ['af'] = '@function.outer',
-        ['if'] = '@function.inner',
-        ['ac'] = '@class.outer',
-        ['ic'] = '@class.inner',
-      },
-    },
-    move = {
-      enable = true,
-      set_jumps = true, -- whether to set jumps in the jumplist
-      goto_next_start = {
-        [']m'] = '@function.outer',
-        [']]'] = '@class.outer',
-      },
-      goto_next_end = {
-        [']M'] = '@function.outer',
-        [']['] = '@class.outer',
-      },
-      goto_previous_start = {
-        ['[m'] = '@function.outer',
-        ['[['] = '@class.outer',
-      },
-      goto_previous_end = {
-        ['[M'] = '@function.outer',
-        ['[]'] = '@class.outer',
-      },
-    },
-  },
+require'nvim-treesitter.configs'.setup {
+    ensure_installed = {"c","cpp","python","rst","bibtex","cmake","lua"}, -- one of "all", "maintained" or a list of languages
+    highlight = {enable = true},
+    indent = {enable = {"javascriptreact"}},
+    autotag = {enable = true},
+    rainbow = {enable = true}
 }
 
 -- LSP settings
