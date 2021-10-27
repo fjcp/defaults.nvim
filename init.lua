@@ -49,8 +49,13 @@ end)
 
 vim.o.expandtab = true
 vim.o.tabstop = 2
+vim.o.softtabstop = 2
 vim.o.shiftwidth = 2
 vim.o.smartindent = true
+vim.o.colorcolumn = "80"
+vim.o.showmode = false
+vim.o.backup = false
+vim.o.writebackup = false
 
 --Incremental live completion (note: this is now a default on master)
 vim.o.inccommand = 'nosplit'
@@ -80,6 +85,7 @@ vim.o.smartcase = true
 --Decrease update time
 vim.o.updatetime = 250
 vim.wo.signcolumn = 'yes'
+vim.wo.cursorline = true
 
 --Set colorscheme (order is important here)
 vim.o.termguicolors = true
