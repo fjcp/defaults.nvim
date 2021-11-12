@@ -58,6 +58,8 @@ vim.o.showmode = false
 vim.o.backup = false
 vim.o.writebackup = false
 
+vim.o.splitbelow = true
+vim.o.splitright = true
 --Incremental live completion (note: this is now a default on master)
 vim.o.inccommand = 'nosplit'
 
