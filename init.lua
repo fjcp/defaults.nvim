@@ -36,12 +36,21 @@ require('packer').startup(function()
   -- Additional textobjects for treesitter
   use 'nvim-treesitter/nvim-treesitter-textobjects'
   use 'neovim/nvim-lspconfig' -- Collection of configurations for built-in LSP client
-  use 'hrsh7th/nvim-cmp' -- Autocompletion plugin
-  use 'hrsh7th/cmp-nvim-lsp'
-  use 'hrsh7th/cmp-buffer'
-  use 'hrsh7th/cmp-path'
-  use 'saadparwaiz1/cmp_luasnip'
-  use 'L3MON4D3/LuaSnip' -- Snippets plugin
+use {
+      "hrsh7th/nvim-cmp",
+      requires = {
+        { "hrsh7th/cmp-buffer" },
+        { "hrsh7th/cmp-nvim-lsp" },
+        { "hrsh7th/cmp-path" },
+        { "hrsh7th/cmp-nvim-lua" },
+        { "ray-x/cmp-treesitter" },
+        { "hrsh7th/nvim-cmp" },
+        { 'saadparwaiz1/cmp_luasnip'},
+        { 'L3MON4D3/LuaSnip'},
+        { "f3fora/cmp-spell" },
+      }
+    }
+  use 'onsails/lspkind-nvim'
  -- Other
   use 'rhysd/vim-clang-format' 
   use 'folke/which-key.nvim'
@@ -221,25 +230,103 @@ vim.o.completeopt = 'menu,menuone,noselect'
 -- luasnip setup
 local luasnip = require 'luasnip'
 
--- nvim-cmp setup
-local cmp = require 'cmp'
+---- nvim-cmp setup
+--local cmp = require 'cmp'
+--cmp.setup {
+--  snippet = {
+--    expand = function(args)
+--      require('luasnip').lsp_expand(args.body)
+--    end,
+--  },
+--  mapping = {
+--    ['<C-p>'] = cmp.mapping.select_prev_item(),
+--    ['<C-n>'] = cmp.mapping.select_next_item(),
+--    ['<C-d>'] = cmp.mapping.scroll_docs(-4),
+--    ['<C-f>'] = cmp.mapping.scroll_docs(4),
+--    ['<C-Space>'] = cmp.mapping.complete(),
+--    ['<C-e>'] = cmp.mapping.close(),
+--    ['<CR>'] = cmp.mapping.confirm {
+--      behavior = cmp.ConfirmBehavior.Replace,
+--      select = true,
+--    },
+--    ['<Tab>'] = function(fallback)
+--      if cmp.visible() then
+--        cmp.select_next_item()
+--      elseif luasnip.expand_or_jumpable() then
+--        luasnip.expand_or_jump()
+--      else
+--        fallback()
+--      end
+--    end,
+--    ['<S-Tab>'] = function(fallback)
+--      if cmp.visible() then
+--        cmp.select_prev_item()
+--      elseif luasnip.jumpable(-1) then
+--        luasnip.jump(-1)
+--      else
+--        fallback()
+--      end
+--    end,
+--  },
+--  sources = {
+--    { name = 'nvim_lsp' },
+--    { name = 'luasnip' },
+--    { name = 'buffer' },
+--    { name = 'path' },
+--  },
+--}
+-- Setup nvim-cmp
+local cmp = require "cmp"
+
+-- lspkind
+local lspkind = require "lspkind"
+lspkind.init {
+  with_text = true,
+  symbol_map = {
+    Text = "",
+    Method = "ƒ",
+    Function = "ﬦ",
+    Constructor = "",
+    Variable = "",
+    Class = "",
+    Interface = "ﰮ",
+    Module = "",
+    Property = "",
+    Unit = "",
+    Value = "",
+    Enum = "了",
+    Keyword = "",
+    Snippet = "﬌",
+    Color = "",
+    File = "",
+    Folder = "",
+    EnumMember = "",
+    Constant = "",
+    Struct = "",
+  },
+}
+
+-- @TODOUA: Try cmdline again soon, lots of updates since last tried
 cmp.setup {
   snippet = {
     expand = function(args)
       require('luasnip').lsp_expand(args.body)
+--      vim.fn["vsnip#anonymous"](args.body)
     end,
   },
   mapping = {
-    ['<C-p>'] = cmp.mapping.select_prev_item(),
-    ['<C-n>'] = cmp.mapping.select_next_item(),
-    ['<C-d>'] = cmp.mapping.scroll_docs(-4),
-    ['<C-f>'] = cmp.mapping.scroll_docs(4),
-    ['<C-Space>'] = cmp.mapping.complete(),
-    ['<C-e>'] = cmp.mapping.close(),
-    ['<CR>'] = cmp.mapping.confirm {
-      behavior = cmp.ConfirmBehavior.Replace,
-      select = true,
+    ["<C-d>"] = cmp.mapping.scroll_docs(-4),
+    ["<C-f>"] = cmp.mapping.scroll_docs(4),
+    ["<C-Space>"] = cmp.mapping.complete(),
+    ["<CR>"] = cmp.mapping {
+      i = cmp.mapping.confirm { select = true },
     },
+    ["<Right>"] = cmp.mapping {
+      i = cmp.mapping.confirm { select = true },
+    },
+--    ["<Tab>"] = cmp.mapping(cmp.mapping.select_next_item(), { "i", "s" }),
+--    ["<S-Tab>"] = cmp.mapping(cmp.mapping.select_prev_item(), { "i", "s" }),
+
     ['<Tab>'] = function(fallback)
       if cmp.visible() then
         cmp.select_next_item()
@@ -258,11 +345,53 @@ cmp.setup {
         fallback()
       end
     end,
+    ["<C-e>"] = cmp.mapping.abort(),
+    ["<Up>"] = cmp.mapping(cmp.mapping.select_prev_item { behavior = cmp.SelectBehavior.Insert }, { "i" }),
+    ["<Down>"] = cmp.mapping(cmp.mapping.select_next_item { behavior = cmp.SelectBehavior.Insert }, { "i" }),
+  },
+  experimental = {
+    ghost_text = true,
+  },
+  documentation = {
+    border = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" },
   },
   sources = {
-    { name = 'nvim_lsp' },
-    { name = 'luasnip' },
-    { name = 'buffer' },
-    { name = 'path' },
+    -- 'crates' is lazy loaded
+    { name = "nvim_lsp" },
+    { name = "treesitter" },
+    { name = "luasnip" },
+    { name = "path" },
+    {
+      name = "buffer",
+      option = {
+        get_bufnrs = function()
+          return vim.api.nvim_list_bufs()
+        end,
+      },
+    },
+    { name = "spell" },
+  },
+  formatting = {
+    format = function(entry, vim_item)
+      vim_item.kind = string.format("%s %s", lspkind.presets.default[vim_item.kind], vim_item.kind)
+      vim_item.menu = ({
+        nvim_lsp = "ﲳ",
+        nvim_lua = "",
+        treesitter = "",
+        path = "ﱮ",
+        buffer = "﬘",
+        zsh = "",
+        vsnip = "",
+        spell = "暈",
+      })[entry.source.name]
+
+      return vim_item
+    end,
   },
 }
+vim.opt.spell = false
+vim.opt.spelllang = { 'en_us' }
+
+-- insert `(` after select function or method item pe this
+local cmp_autopairs = require "nvim-autopairs.completion.cmp"
+cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done { map_char = { tex = "" } })
