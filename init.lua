@@ -56,6 +56,7 @@ use {
   use 'folke/which-key.nvim'
   use 'skywind3000/asyncrun.vim'
   use 'windwp/nvim-autopairs'
+  use 'williamboman/nvim-lsp-installer'
 end)
 
 vim.o.expandtab = true
@@ -132,7 +133,6 @@ vim.api.nvim_exec(
 ]],
   false
 )
-
 -- Y yank until the end of line  (note: this is now a default on master)
 vim.api.nvim_set_keymap('n', 'Y', 'y$', { noremap = true })
 
@@ -389,9 +389,11 @@ cmp.setup {
     end,
   },
 }
-vim.opt.spell = false
+vim.opt.spell = true
 vim.opt.spelllang = { 'en_us' }
-
+vim.cmd('highlight clear SpellBad')
+vim.cmd('highlight link SpellBad WarningMsg')
+--
 -- insert `(` after select function or method item pe this
 local cmp_autopairs = require "nvim-autopairs.completion.cmp"
 cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done { map_char = { tex = "" } })
